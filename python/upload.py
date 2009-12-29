@@ -1,5 +1,9 @@
 #!/usr/bin/python
 
+#TODO check to see if the file already exists
+#TODO make sure the file is not ".htaccess" or any other troublesome files
+#TODO remove the sessions dependency
+
 import web
 
 urls = ('/upload', 'Upload',
@@ -48,7 +52,7 @@ REPLACE
 	    fout.close() # closes the file, upload complete.
 
 	session.filename='http://sente.cc/uploaded/' + filename
-	web.sendmail('stu@sente.cc', 'stu@lispclub.com' , session.filename, session.filename)
+	web.sendmail('stu@sente.cc', 'stuart.powers@gmail.com' , session.filename, session.filename)
 	raise web.seeother('/')
 
 if __name__ == "__main__":
