@@ -1,9 +1,6 @@
+#!/usr/bin/python
+
 import web
-
-
-# a primitive upload script
-# to run it: python ./upload.pl #PORT
-# requires web.py
 
 urls = ('/upload', 'Upload',
 	'/', 'Upload')
@@ -40,6 +37,9 @@ REPLACE
     def POST(self):
 	x = web.input(myfile={})
 	filedir = '/var/www/sente/htdocs/uploaded/'
+	#TODO check to see if the file already exists
+	#TODO make sure myfile is not ".htaccess" or any other troublesome files
+	# 	currently the .htaccess file cannot be overwritten because thx to file perms
 	if 'myfile' in x: # to check if the file-object is created
 	    filepath=x.myfile.filename.replace('\\','/') # replaces the windows-style slashes with linux ones.
 	    filename=filepath.split('/')[-1] # splits the and chooses the last part (the filename with extension)
