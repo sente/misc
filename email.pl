@@ -1,5 +1,4 @@
 #!/usr/bin/perl -wT
-use Data::Dumper;
  
 # The idea is to present a CGI over https, allowing you to leave a note with a
 # link that will work exactly once.
