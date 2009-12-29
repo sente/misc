@@ -1,4 +1,3 @@
-#!/usr/bin/python
 
 #TODO check to see if the file already exists
 #TODO make sure the file is not ".htaccess" or any other troublesome files
