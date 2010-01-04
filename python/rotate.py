@@ -31,7 +31,7 @@ rotate.py -- accepts a pipe of tabular data.
 
 	mat=[]
 	for line in sys.stdin:
-		mat.append(line.split.rstrip("\n").(delimiter))
+		mat.append(line.rstrip("\n").split(delimiter))
 
 	rot=zip(*mat)
 
