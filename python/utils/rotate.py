@@ -36,7 +36,7 @@ rotate.py -- accepts a pipe of tabular data.
 	rot=zip(*mat)
 
 	for line in rot:
-		print "\t".join(line)
+		print delimiter.join(line)
 
 
 
