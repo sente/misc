@@ -8,7 +8,7 @@ import getopt
 def main():
 	"""
 	Options:
-pipe.py -- accepts a pipe of tabular data.
+rotate.py -- accepts a pipe of tabular data.
   rotate the columns into rows and rows into columns.
 	-h	Display this help.
 	-d <delimiter> 	use delimiter
