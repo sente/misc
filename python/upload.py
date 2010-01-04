@@ -10,7 +10,7 @@ urls = ('/upload', 'Upload',
 
 web.config.debug = False
 
-app = web.application(urls, globals()) 
+app = web.application(urls, globals())
 session = web.session.Session(app, web.session.DiskStore('sessions'), initializer={'filename': 'gote'})
 
 class Upload:
