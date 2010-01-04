@@ -8,6 +8,7 @@ web.config.debug = False
 app = web.application(urls, globals())
 session = web.session.Session(app, web.session.DiskStore('sessions'), initializer={'filename': 'gote'})
 
+
 #TODO check to see if the file already exists
 #TODO make sure the file is not ".htaccess" or any other troublesome files
 #TODO remove the sessions dependency
