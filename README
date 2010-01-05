@@ -1,0 +1,7 @@
+/usr/lib/cgi-bin/ contains symlinks pointing to these files:
+
+/usr/lib/cgi-bin/email.pl -> /path/to/repo/misc/perl/email.pl
+/usr/lib/cgi-bin/mktmp.pl -> /path/to/repo/misc/perl/mktmp.pl
+/usr/lib/cgi-bin/paste.pl -> /path/to/repo/misc/perl/paste.pl
+
+/usr/lib/cgi-bin/cgi_upload.py -> /path/to/repo/misc/python/web/cgi_upload.py
