@@ -1,4 +1,6 @@
 import web
+import os
+
 
 urls = ('/upload', 'Upload',
 	'/', 'Upload')
@@ -40,19 +42,21 @@ class Upload:
 
 	def POST(self):
 		x = web.input(myfile={})
-		filedir = '/var/www/sente/htdocs/uploaded/'
+		filedir = '/var/www/sente/htdocs/uploaded'
 		#TODO check to see if the file already exists
 		#TODO make sure myfile is not ".htaccess" or any other troublesome files
 		#	currently the .htaccess file cannot be overwritten because thx to file perms
 		if 'myfile' in x: # to check if the file-object is created
 			filepath=x.myfile.filename.replace('\\','/') # replaces the windows-style slashes with linux ones.
 			filename=filepath.split('/')[-1] # splits the and chooses the last part (the filename with extension)
-			fout = open(filedir +'/'+ filename,'w') # creates the file where the uploaded file should be stored
-			fout.write(x.myfile.file.read()) # writes the uploaded file to the newly created file.
-			fout.close() # closes the file, upload complete.
+			ffff=filedir + '/' + filename
+			fout = open(ffff,'w')
+			fout.write(x.myfile.file.read())
+			fout.close()
+			os.lchown(ffff, -1, 33) #33 is the www-data group id
 
 		session.filename='http://sente.cc/uploaded/' + filename
-		web.sendmail('stu@sente.cc', 'stuart.powers@gmail.com' , session.filename, session.filename)
+		web.sendmail('stu@sente.cc', 'stu@sente.cc' , session.filename, session.filename)
 	#	raise web.seeother('/')
 
 
