@@ -10,7 +10,7 @@ use CGI;
 $ENV{"PATH"}="";
 
 my $q = new CGI;
-my $emailaddress = "stuart.powers\@gmail.com";
+my $emailaddress = "stu\@sente.cc";
 
 my $DEBUG=0;
 my $D;
