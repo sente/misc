@@ -86,7 +86,7 @@ if ($q->param('id') and $q->param('id') =~ /(\d+)/) {
 } else {
   print <<HTML;
 <html><head><title>Leave a "secure" note</title></head>
-<body><form "email" action="/cgi-bin/email.pl" method="post">
+<body><form name="email" action="/cgi-bin/email.pl" method="post">
 Enter text:<br />
 <textarea name="note" cols="70" rows="30"></textarea><br />
 <input type="submit" value="Save note" />
