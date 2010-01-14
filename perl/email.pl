@@ -76,9 +76,9 @@ if ($q->param('id') and $q->param('id') =~ /(\d+)/) {
       print "<pre>\n";
       print "an email has been sent\n";
 		print "<a href=\"http://sente.cc/cgi-bin/email.pl?id=$id\">http://sente.cc/cgi-bin/email.pl?id=$id</a>\n";
-		print "<hr/>";
-		print $note;
-		print "</pre>";
+#		print "<hr/>";
+#		print $note;
+#		print "</pre>";
     } else {
       print "Failed to save/email your note: $!. Try again later.";
     }
@@ -86,7 +86,7 @@ if ($q->param('id') and $q->param('id') =~ /(\d+)/) {
 } else {
   print <<HTML;
 <html><head><title>Leave a "secure" note</title></head>
-<body><form action="/cgi-bin/email.pl" method="post">
+<body><form "email" action="/cgi-bin/email.pl" method="post">
 Enter text:<br />
 <textarea name="note" cols="70" rows="30"></textarea><br />
 <input type="submit" value="Save note" />

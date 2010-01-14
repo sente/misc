@@ -53,8 +53,10 @@ if ($q->param('id') and $q->param('id') =~ /(\d+)/) {
       print ID $note;
       close ID;
  
-      print "Your note has been saved. Please send this link to the recipient:<br />";
-      print "<code>http://sente.cc/cgi-bin/paste.pl?id=$id</code><br />";
+		print "<code>";
+      print "Your note has been saved. Please send this link to the recipient:<br />\n";
+      print "http://sente.cc/cgi-bin/paste.pl?id=$id";
+		print "\n<br />";
       print "This link will work one time only - it will automatically be deleted after it's visited.";
     } else {
       print "Failed to save your note: $!. Try again later.";
@@ -63,7 +65,7 @@ if ($q->param('id') and $q->param('id') =~ /(\d+)/) {
 } else {
   print <<HTML;
 <html><head><title>Leave a "secure" note</title></head>
-<body><form method="post">
+<body><form name="paste" action="/cgi-bin/paste.pl" method="post" >
 Enter text:<br />
 <textarea name="note" cols="60" rows="20"></textarea><br />
 <input type="submit" value="Save note" />
