@@ -40,8 +40,7 @@ formhead = """<html><head>
 <!-- http://www.somacon.com/p141.php -->
 <link rel="stylesheet" type="text/css" href="/stu/compare-bin.css" media="all" />
 
-<title>File Upload</title><body>
-<h2>Upload one or more files:</h2>
+<title>diff some files</title><body>
 <P>
 There's currently %s %s equalling %.2f kb. """
 
@@ -279,11 +278,10 @@ def main():
     if anyfiles and (not maxkb or uploadsize < maxkb):    # we are uploading
         upp=do_upload(data, fns, uploadsize)
 #        diffreg  = subprocess.Popen(["diff", "--side-by-side", "-W30",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
-        diffsuppress = subprocess.Popen(["diff", "-y", "-W 200", "--suppress-common-lines",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
-        diffall = subprocess.Popen(["diff", "-y", "-W 200", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
-        diffnorm = subprocess.Popen(["diff", "--normal", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
-
-        diffcolor = subprocess.Popen(["/var/www/sente/colorhtml", "-y", "-W 200", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+        diffnorm     = subprocess.Popen(["diff",                    "--normal", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+        diffsuppress = subprocess.Popen(["diff",                     "-y", "-W 200", "--suppress-common-lines",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+        diffnocolor  = subprocess.Popen(["diff",                     "-y", "-W 200", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+        diffcolor    = subprocess.Popen(["/var/www/sente/colorhtml", "-y", "-W 200", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
 #        diffhtml = subprocess.Popen(["./diff2html", "-y --suppress-common-lines",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
 
         md5sum = subprocess.Popen(["md5sum", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
@@ -296,10 +294,22 @@ def main():
         ff=open(filefile, "w")
         ff.write(diffcolor) 
         ff.close()
-        print "colorized side-by-side version"
         print "<a href=\"" + urlfile + "\">" + urlfile + "</a>"
+        print "side-by-side, suppress common lines, colorized"
 
         print "<br>"
+
+        md = md5sum + "_nocolor.txt"
+        filefile="/var/www/sente/htdocs/uploaded/" + md
+        urlfile="/uploaded/" + md
+        ff=open(filefile, "w")
+        ff.write(diffnocolor) 
+        ff.close()
+        print "<a href=\"" + urlfile + "\">" + urlfile + "</a>"
+        print "side-by-side, suppress common lines"
+
+        print "<br>"
+
 
         md = md5sum + "_suppress.txt"
         filefile="/var/www/sente/htdocs/uploaded/" + md
@@ -307,8 +317,8 @@ def main():
         ff=open(filefile, "w")
         ff.write(diffsuppress) 
         ff.close()
-        print "colorized side-by-side version"
         print "<a href=\"" + urlfile + "\">" + urlfile + "</a>"
+        print "side-by-side, suppress common lines"
 
         print "<br>"
 
@@ -319,51 +329,15 @@ def main():
         ff=open(filefile, "w")
         ff.write(diffnorm) 
         ff.close()
+        print "<a href=\"" + urlfile + "\">" + urlfile + "</a>"
         print "normal diff output"
-        print "<a href=\"" + urlfile + "\">" + urlfile + "</a>"
-
-        print "<br>"
-
-        md = md5sum + "_all.txt"
-        filefile="/var/www/sente/htdocs/uploaded/" + md
-        urlfile="/uploaded/" + md
-        ff=open(filefile, "w")
-        ff.write(diffall) 
-        ff.close()
-        print "show all lines"
-        print "<a href=\"" + urlfile + "\">" + urlfile + "</a>"
 
         print "<br>"
 
 
-
-#        print "<pre>"
-#        print diffall
-#        print "</pre>"
-#
-#        print "NORMAL<br>"
-#
-#        print "<pre>"
-#        print diffnorm
-#        print "</pre>"
-
-#        print "<a href=\"/uploaded/test_diffa.html\">/uploaded/test_diffa.html</a>"
-
-#        print "<pre>"
-#        print "<a href=\"/uploaded/test_diffb.html\">/uploaded/test_diffb.html</a>"
-#        print "</pre>"
-
-#        print "<hr>"
-#
-#        print "<pre>"
-#        print diffside 
-#        print "</pre>"
-#        print "<hr>"
-#
-#        print diffhtml
-#        print "<hr>"
-
-
+        print "<pre>"
+        print diffnocolor
+        print "</pre>"
 
 
     elif maxkb and uploadsize >= maxkb:
