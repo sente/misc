@@ -21,7 +21,7 @@
 #######################################################################
 # Constants. Used when run as __main__
 
-dirUpload = "/var/www/sente/htdocs/uploaded/"            # directory for upload; will be created if doesn't exist
+dirUpload = "/var/www/sente/htdocs/uploaded"            # directory for upload; will be created if doesn't exist
 maxkb = 1000000                    # maximum kilobytes to store before no more files accepted
 email = "stuart.powers@gmail.com"     # where to email upload reports;
 
@@ -72,10 +72,10 @@ formbody = """
 </tr>
 <tr>
     <td>
-        <textarea name="note.1" cols="70" rows="30"></textarea>
+        <textarea name="note.1" cols="70" rows="30">not yet implemented</textarea>
     </td>
     <td>
-        <textarea name="note.2" cols="70" rows="30"></textarea><br />
+        <textarea name="note.2" cols="70" rows="30">not yet implemented</textarea><br />
     </td>
 </tr>
 <tr>
@@ -96,7 +96,8 @@ fullmsg = "There are already %.2f kb files in the upload area, which is more tha
 uploadhead = "<HTML><HEAD><TITLE>Upload Results</TITLE></HEAD><BODY>"
 
 # List of the file 'names' to retrieve from the HTML form.
-filelist = ['file.1', 'file.2', 'file.3', 'file.4', 'file.5', 'file.6', ]
+filelist = ['file.1', 'file.2']
+notelist = ['note.1', 'note.2']
 serverline = "Content-type: text/html\n"
 
 #######################################################################
@@ -108,6 +109,7 @@ import glob
 import string
 import os.path
 import cgi
+import subprocess
 try:
     import cgitb
     cgitb.enable()
@@ -172,7 +174,7 @@ def getdirsize(indir=dirUpload):
     return kb
 
 
-def savefiles(data, dirUpload=dirUpload,filelist=filelist, maxkb=maxkb, uploadsize=None):
+def savefiles(data, dirUpload=dirUpload,filelist=filelist, notelist=notelist, maxkb=maxkb, uploadsize=None):
     """ Given a CGI FieldStorage object, a directory to save to,
     and the list of file keys to check for - this function saves out any uploaded files.
     If necessary it creates the upload directory.
@@ -189,6 +191,7 @@ def savefiles(data, dirUpload=dirUpload,filelist=filelist, maxkb=maxkb, uploadsi
     kbList = []
     kbCount = 0
     failed = []
+    upfiles = []
     for key in filelist:
         if data.has_key(key):
             fn = data[key].filename
@@ -210,7 +213,8 @@ def savefiles(data, dirUpload=dirUpload,filelist=filelist, maxkb=maxkb, uploadsi
                 fnList.append(fn)
                 kbList.append(len(data[key].value))
                 kbCount = kbCount + len(data[key].value)
-    return (fnList, kbList , kbCount, failed)
+                upfiles.append(dirUpload+os.sep+fn)
+    return (fnList, kbList , kbCount, failed, upfiles)
 
 def plural(s,num):
     "Make plural words nicely as possible."
@@ -233,32 +237,33 @@ def has_files(data):
 
 def do_upload(data, fns, uploadsize):
     """Do the upload and print any message."""
-    fnList, kbList , kbCount, failed = savefiles(data)
+    fnList, kbList , kbCount, failed, upfiles = savefiles(data)
     print uploadhead
-    if len(fnList):
-        msg = "<H2>%s %s totalling %.2f kb uploaded successfully:</H2>\n\n" % (len(fnList),plural("file",len(fnList)),kbCount / 1024.0)        
-        print msg
-        print "<HR><P><UL>"
-        for x in range(0,len(fnList)):
-            msg = msg + "  * %s (%.2f kb)\n" % (fnList[x],kbList[x] / 1024.0)
-            print "<LI>%s (%.2f kb)" % (fnList[x],kbList[x] / 1024.0)
-        print "</UL>"
-        print "<P><HR>"
-    if failed:
-        newmess = 'The following files failed to upload as the max size was reached :'
-        msg = msg + '\n' + newmess + '\n'
-        print "<P>%s<BR><UL>" % newmess
-        for entry in failed:
-            print '<LI>' + entry 
-            msg = msg + entry + '\n'
-        print '</UL><<BR>><HR><P>'
-    print "Now a total of %.2f kb in %s %s in the upload area.<BR>" % (uploadsize + (kbCount / 1024.0),len(fnList)+fns,plural("file",len(fnList)+fns))
-#	 print msg
-    if email:
-        mailme(msg[4:]+"\n\n")
-    if not len(fnList):
-        print "No files were successfully uploaded.<BR>"
-    print formfoot
+#    if len(fnList):
+#        msg = "<H2>%s %s totalling %.2f kb uploaded successfully:</H2>\n\n" % (len(fnList),plural("file",len(fnList)),kbCount / 1024.0)        
+#        print msg
+#        print "<HR><P><UL>"
+#        for x in range(0,len(fnList)):
+#            msg = msg + "  * %s (%.2f kb)\n" % (fnList[x],kbList[x] / 1024.0)
+#            print "<LI>%s (%.2f kb)" % (fnList[x],kbList[x] / 1024.0)
+#        print "</UL>"
+#        print "<P><HR>"
+#    if failed:
+#        newmess = 'The following files failed to upload as the max size was reached :'
+#        msg = msg + '\n' + newmess + '\n'
+#        print "<P>%s<BR><UL>" % newmess
+#        for entry in failed:
+#            print '<LI>' + entry 
+#            msg = msg + entry + '\n'
+#        print '</UL><<BR>><HR><P>'
+#    print "Now a total of %.2f kb in %s %s in the upload area.<BR>" % (uploadsize + (kbCount / 1024.0),len(fnList)+fns,plural("file",len(fnList)+fns))
+##	 print msg
+#    if email:
+#        mailme(msg[4:]+"\n\n")
+#    if not len(fnList):
+#        print "No files were successfully uploaded.<BR>"
+#    print formfoot
+    return upfiles
 
 #######################################################################
 # If run as a cgi this part performs the upload
@@ -268,10 +273,99 @@ def main():
     data = cgi.FieldStorage()
     anyfiles = has_files(data)
 
+    upp=[]
     uploadsize = getdirsize()/1024.0            # the current directory size in kb
     fns = len(glob.glob(dirUpload+os.sep+"*"))   # no of files in the directory
     if anyfiles and (not maxkb or uploadsize < maxkb):    # we are uploading
-        do_upload(data, fns, uploadsize)
+        upp=do_upload(data, fns, uploadsize)
+#        diffreg  = subprocess.Popen(["diff", "--side-by-side", "-W30",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+        diffsuppress = subprocess.Popen(["diff", "-y", "-W 200", "--suppress-common-lines",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+        diffall = subprocess.Popen(["diff", "-y", "-W 200", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+        diffnorm = subprocess.Popen(["diff", "--normal", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+
+        diffcolor = subprocess.Popen(["/var/www/sente/colorhtml", "-y", "-W 200", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+#        diffhtml = subprocess.Popen(["./diff2html", "-y --suppress-common-lines",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+
+        md5sum = subprocess.Popen(["md5sum", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+
+        md5sum=md5sum.split(' ')[0]
+
+        md = md5sum + "_color.html"
+        filefile="/var/www/sente/htdocs/uploaded/" + md
+        urlfile="/uploaded/" + md
+        ff=open(filefile, "w")
+        ff.write(diffcolor) 
+        ff.close()
+        print "colorized side-by-side version"
+        print "<a href=\"" + urlfile + "\">" + urlfile + "</a>"
+
+        print "<br>"
+
+        md = md5sum + "_suppress.txt"
+        filefile="/var/www/sente/htdocs/uploaded/" + md
+        urlfile="/uploaded/" + md
+        ff=open(filefile, "w")
+        ff.write(diffsuppress) 
+        ff.close()
+        print "colorized side-by-side version"
+        print "<a href=\"" + urlfile + "\">" + urlfile + "</a>"
+
+        print "<br>"
+
+
+        md = md5sum + "_normal.txt"
+        filefile="/var/www/sente/htdocs/uploaded/" + md
+        urlfile="/uploaded/" + md
+        ff=open(filefile, "w")
+        ff.write(diffnorm) 
+        ff.close()
+        print "normal diff output"
+        print "<a href=\"" + urlfile + "\">" + urlfile + "</a>"
+
+        print "<br>"
+
+        md = md5sum + "_all.txt"
+        filefile="/var/www/sente/htdocs/uploaded/" + md
+        urlfile="/uploaded/" + md
+        ff=open(filefile, "w")
+        ff.write(diffall) 
+        ff.close()
+        print "show all lines"
+        print "<a href=\"" + urlfile + "\">" + urlfile + "</a>"
+
+        print "<br>"
+
+
+
+#        print "<pre>"
+#        print diffall
+#        print "</pre>"
+#
+#        print "NORMAL<br>"
+#
+#        print "<pre>"
+#        print diffnorm
+#        print "</pre>"
+
+#        print "<a href=\"/uploaded/test_diffa.html\">/uploaded/test_diffa.html</a>"
+
+#        print "<pre>"
+#        print "<a href=\"/uploaded/test_diffb.html\">/uploaded/test_diffb.html</a>"
+#        print "</pre>"
+
+#        print "<hr>"
+#
+#        print "<pre>"
+#        print diffside 
+#        print "</pre>"
+#        print "<hr>"
+#
+#        print diffhtml
+#        print "<hr>"
+
+
+
+
     elif maxkb and uploadsize >= maxkb:
         print fullhead
         print fullmsg % (uploadsize, maxkb)
@@ -281,6 +375,7 @@ def main():
         if maxkb: print maxline % maxkb
         print formbody % posturl
         print formfoot
+
 
 #######################################################################
 if __name__ == '__main__':
