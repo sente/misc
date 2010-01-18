@@ -238,30 +238,6 @@ def do_upload(data, fns, uploadsize):
     """Do the upload and print any message."""
     fnList, kbList , kbCount, failed, upfiles = savefiles(data)
     print uploadhead
-#    if len(fnList):
-#        msg = "<H2>%s %s totalling %.2f kb uploaded successfully:</H2>\n\n" % (len(fnList),plural("file",len(fnList)),kbCount / 1024.0)        
-#        print msg
-#        print "<HR><P><UL>"
-#        for x in range(0,len(fnList)):
-#            msg = msg + "  * %s (%.2f kb)\n" % (fnList[x],kbList[x] / 1024.0)
-#            print "<LI>%s (%.2f kb)" % (fnList[x],kbList[x] / 1024.0)
-#        print "</UL>"
-#        print "<P><HR>"
-#    if failed:
-#        newmess = 'The following files failed to upload as the max size was reached :'
-#        msg = msg + '\n' + newmess + '\n'
-#        print "<P>%s<BR><UL>" % newmess
-#        for entry in failed:
-#            print '<LI>' + entry 
-#            msg = msg + entry + '\n'
-#        print '</UL><<BR>><HR><P>'
-#    print "Now a total of %.2f kb in %s %s in the upload area.<BR>" % (uploadsize + (kbCount / 1024.0),len(fnList)+fns,plural("file",len(fnList)+fns))
-##	 print msg
-#    if email:
-#        mailme(msg[4:]+"\n\n")
-#    if not len(fnList):
-#        print "No files were successfully uploaded.<BR>"
-#    print formfoot
     return upfiles
 
 #######################################################################
@@ -278,66 +254,100 @@ def main():
     if anyfiles and (not maxkb or uploadsize < maxkb):    # we are uploading
         upp=do_upload(data, fns, uploadsize)
 #        diffreg  = subprocess.Popen(["diff", "--side-by-side", "-W30",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
-        diffnorm     = subprocess.Popen(["diff",                    "--normal", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
-        diffsuppress = subprocess.Popen(["diff",                     "-y", "-W 200", "--suppress-common-lines",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
-        diffnocolor  = subprocess.Popen(["diff",                     "-y", "-W 200", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
-        diffcolor    = subprocess.Popen(["/var/www/sente/colorhtml", "-y", "-W 200", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+
+        diffnorm     = subprocess.Popen(["/usr/bin/diff",                    "--normal", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+        diffsuppress = subprocess.Popen(["/usr/bin/diff",                     "-y", "-W 200", "--suppress-common-lines",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+        diffnocolor  = subprocess.Popen(["/usr/bin/diff",                     "-y", "-W 200", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+        diffcolor    = subprocess.Popen(["./colorhtml", "-y", "-W 200", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
 #        diffhtml = subprocess.Popen(["./diff2html", "-y --suppress-common-lines",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
 
         md5sum = subprocess.Popen(["md5sum", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
 
         md5sum=md5sum.split(' ')[0]
 
+
+        filelocation="/var/www/sente/htdocs/uploaded/" + md5sum + ".html"
+        goodfile=[]
+#        goodfile=open(filelocation, "w")
+
         md = md5sum + "_color.html"
         filefile="/var/www/sente/htdocs/uploaded/" + md
         urlfile="/uploaded/" + md
         ff=open(filefile, "w")
-        ff.write(diffcolor) 
+        ff.write(diffcolor)
         ff.close()
         print "<a href=\"" + urlfile + "\">" + urlfile + "</a>"
         print "side-by-side, suppress common lines, colorized"
-
         print "<br>"
+        goodfile.append("<a href=\"" + urlfile + "\">\n" + link + urlfile + "\n</a>")
+        goodfile.append("side-by-side, suppress common lines, colorized")
+        goodfile.append("<br>")
+        goodfile.append("<br>")
 
         md = md5sum + "_nocolor.txt"
         filefile="/var/www/sente/htdocs/uploaded/" + md
         urlfile="/uploaded/" + md
         ff=open(filefile, "w")
-        ff.write(diffnocolor) 
+        ff.write(diffnocolor)
         ff.close()
         print "<a href=\"" + urlfile + "\">" + urlfile + "</a>"
         print "side-by-side, suppress common lines"
-
         print "<br>"
+        goodfile.append("<a href=\"" + urlfile + "\">\n" + link + urlfile + "\n</a>")
+        goodfile.append("side-by-side, suppress common lines")
+        goodfile.append("<br>")
+        goodfile.append("<br>\n")
 
 
         md = md5sum + "_suppress.txt"
         filefile="/var/www/sente/htdocs/uploaded/" + md
         urlfile="/uploaded/" + md
         ff=open(filefile, "w")
-        ff.write(diffsuppress) 
+        ff.write(diffsuppress)
         ff.close()
         print "<a href=\"" + urlfile + "\">" + urlfile + "</a>"
         print "side-by-side, suppress common lines"
-
         print "<br>"
-
+        goodfile.append("<a href=\"" + urlfile + "\">\n" + link + urlfile + "\n</a>")
+        goodfile.append("side-by-side, suppress common lines")
+        goodfile.append("<br>")
+        goodfile.append("<br>\n")
 
         md = md5sum + "_normal.txt"
         filefile="/var/www/sente/htdocs/uploaded/" + md
         urlfile="/uploaded/" + md
         ff=open(filefile, "w")
-        ff.write(diffnorm) 
+        ff.write(diffnorm)
         ff.close()
         print "<a href=\"" + urlfile + "\">" + urlfile + "</a>"
         print "normal diff output"
-
         print "<br>"
+        goodfile.append("<a href=\"" + urlfile + "\">\n" + link + urlfile + "\n</a>")
+        goodfile.append("normal diff output")
+        goodfile.append("<br>")
+        goodfile.append("<br>\n")
 
+
+#        goodfile.close
 
         print "<pre>"
         print diffnocolor
         print "</pre>"
+
+        print "<br>\n\n"
+        print "BEGIN LINKS\n"
+#        print "http://www.sente.cc/uploaded/" + md5sum + ".html"
+#        print "<br>\n"
+        for asdf in goodfile:
+            print asdf
+
+#        print filelocation
+#        fff=open(filelocation)
+#        #fff=open("/var/www/sente/htdocs/uploaded/fff.please.html", "r")
+#        print fff.mode
+#        for line in fff:
+#           print line
+#        fff.close()
 
 
     elif maxkb and uploadsize >= maxkb:
