@@ -255,9 +255,12 @@ def main():
         upp=do_upload(data, fns, uploadsize)
 #        diffreg  = subprocess.Popen(["diff", "--side-by-side", "-W30",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
 
-        diffnorm     = subprocess.Popen(["/usr/bin/diff",                    "--normal", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
-        diffsuppress = subprocess.Popen(["/usr/bin/diff",                     "-y", "-W 200", "--suppress-common-lines",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
-        diffnocolor  = subprocess.Popen(["/usr/bin/diff",                     "-y", "-W 200", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+#        diffnorm     = subprocess.Popen(["/usr/bin/diff",                    "--normal", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+#        diffsuppress = subprocess.Popen(["/usr/bin/diff",                     "-y", "-W 200", "--suppress-common-lines",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+#        diffnocolor  = subprocess.Popen(["/usr/bin/diff",                     "-y", "-W 200", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+        diffnorm     = subprocess.Popen(["./colorhtml",                    "--normal", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+        diffsuppress = subprocess.Popen(["./colorhtml",                     "-y", "-W 200", "--suppress-common-lines",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+        diffnocolor  = subprocess.Popen(["./colorhtml",                     "-y", "-W 200", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
         diffcolor    = subprocess.Popen(["./colorhtml", "-y", "-W 200", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
 #        diffhtml = subprocess.Popen(["./diff2html", "-y --suppress-common-lines",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
 
@@ -284,7 +287,7 @@ def main():
         goodfile.append("<br>")
         goodfile.append("<br>")
 
-        md = md5sum + "_nocolor.txt"
+        md = md5sum + "_nocolor.html"
         filefile="/var/www/sente/htdocs/uploaded/" + md
         urlfile="/uploaded/" + md
         ff=open(filefile, "w")
@@ -299,7 +302,7 @@ def main():
         goodfile.append("<br>\n")
 
 
-        md = md5sum + "_suppress.txt"
+        md = md5sum + "_suppress.html"
         filefile="/var/www/sente/htdocs/uploaded/" + md
         urlfile="/uploaded/" + md
         ff=open(filefile, "w")
@@ -313,7 +316,7 @@ def main():
         goodfile.append("<br>")
         goodfile.append("<br>\n")
 
-        md = md5sum + "_normal.txt"
+        md = md5sum + "_normal.html"
         filefile="/var/www/sente/htdocs/uploaded/" + md
         urlfile="/uploaded/" + md
         ff=open(filefile, "w")
