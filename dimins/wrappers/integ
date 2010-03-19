@@ -1,0 +1,48 @@
+#!/bin/sh
+#Thu Mar 11 16:28:46 EST 2010
+#used to log EVERY CALL
+
+LOGDIR=/di/logs/commands
+
+PREFIX=integ
+
+starttime=`date +%s`
+
+ID=`date "+%Y%m%d.%H%M.%N"`
+
+LOGFILE=i_${ID}.log
+
+unique_log=${LOGDIR}/${LOGFILE}
+all_commands=${LOGDIR}/${PREFIX}_all_commands.log
+
+#if [ "$HH" = "" ];
+#	then HH=$$
+#	else HH=$HH,$$
+#fi
+#export HH
+
+#ps -o cmd -p $HH >> $unique_log
+#echo "ps -o pid,ppid,cmd -p $HH" >> $unique_log
+#ps -o pid,ppid,cmd -p $HH >> $unique_log
+
+echo $PWD >> $unique_log
+echo "$@" >> $unique_log
+
+echo -e "${LOGFILE}\tSTART\t0\t${PWD}\t${@}" >> $all_commands
+
+integexec "$@" | tee -a $unique_log 
+
+status=${PIPESTATUS[0]}
+
+endtime=`date +%s`
+
+total_time=$((endtime - starttime))
+
+echo $total_time >> $unique_log
+
+if [ "$status" -eq "0" ];
+	then echo -e "${LOGFILE}\tEND\t${total_time}\t${PWD}\t${@}" >> $all_commands
+	else echo -e "${LOGFILE}\tFAILED\t${total_time}\t${PWD}\t${@}" >> $all_commands
+fi
+
+exit $status

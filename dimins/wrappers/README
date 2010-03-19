@@ -1,0 +1,11 @@
+these scripts are used to log all calls to the integrator or builder
+and the commands output.
+
+they require the 'actual' integrator/builder to reside at:
+
+/di/solution/executables/integexec
+/di/solution/executables/integbuilder
+
+and a g+w directory to write to:
+/di/logs/commands
+
