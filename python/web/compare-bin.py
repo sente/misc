@@ -21,8 +21,14 @@
 #######################################################################
 # Constants. Used when run as __main__
 
-dirUpload = "/var/www/sente/htdocs/uploaded"            # directory for upload; will be created if doesn't exist
-maxkb = 1000000                    # maximum kilobytes to store before no more files accepted
+
+import time
+timestamp="-".join(["%02d" %x for x in time.localtime()[0:3]])
+
+dirUpload = "/var/www/sente/htdocs/uploaded/"            # directory for upload; will be created if doesn't exist
+dirUpload = dirUpload + timestamp
+
+maxkb = 10000000                    # maximum kilobytes to store before no more files accepted
 email = "stuart.powers@gmail.com"     # where to email upload reports;
 
 email=None
@@ -255,27 +261,37 @@ def main():
         upp=do_upload(data, fns, uploadsize)
 #        diffreg  = subprocess.Popen(["diff", "--side-by-side", "-W30",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
 
-#        diffnorm     = subprocess.Popen(["/usr/bin/diff",                    "--normal", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
-#        diffsuppress = subprocess.Popen(["/usr/bin/diff",                     "-y", "-W 200", "--suppress-common-lines",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
-#        diffnocolor  = subprocess.Popen(["/usr/bin/diff",                     "-y", "-W 200", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
-        diffnorm     = subprocess.Popen(["./colorhtml",                    "--normal", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
-        diffsuppress = subprocess.Popen(["./colorhtml",                     "-y", "-W 200", "--suppress-common-lines",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
-        diffnocolor  = subprocess.Popen(["./colorhtml",                     "-y", "-W 200", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
-        diffcolor    = subprocess.Popen(["./colorhtml", "-y", "-W 200", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+        diffnorm     = subprocess.Popen(["/usr/local/bin/colorhtml",                    "--normal", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+        diffsuppress = subprocess.Popen(["/usr/local/bin/colorhtml",                     "-y", "-W 200", "--suppress-common-lines",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+        diffnocolor  = subprocess.Popen(["/usr/local/bin/colorhtml",                     "-y", "-W 200", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
+        diffcolor    = subprocess.Popen(["/usr/local/bin/colorhtml", "-y", "-W 200", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
 #        diffhtml = subprocess.Popen(["./diff2html", "-y --suppress-common-lines",  upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
 
         md5sum = subprocess.Popen(["md5sum", upp[0], upp[1]],stdout=subprocess.PIPE).communicate()[0]
 
-        md5sum=md5sum.split(' ')[0]
+        md5sum=md5sum.split(' ')[0][0:10]
 
+        import time
 
-        filelocation="/var/www/sente/htdocs/uploaded/" + md5sum + ".html"
+        md5sum = "%s-%s" % (os.path.basename(upp[0]),os.path.basename(upp[1]))
+        md5sum = md5sum + "." +str(int(time.strftime("%s")) % 10000)
+
+        timestamp="-".join(["%02d" %x for x in time.localtime()[0:3]])
+#       timestamp=YYYY-MM-DD
+        base="/var/www/sente/htdocs/uploaded/" 
+
+        if not os.path.isdir(base+timestamp):
+            os.mkdir(base + timestamp + "/")
+
+        root=base + timestamp + "/"
+
+        filelocation=root + md5sum + ".html"
         goodfile=[]
 #        goodfile=open(filelocation, "w")
 
         md = md5sum + "_color.html"
-        filefile="/var/www/sente/htdocs/uploaded/" + md
-        urlfile="/uploaded/" + md
+        filefile=root + md
+        urlfile="/uploaded/" + timestamp + "/" + md
         ff=open(filefile, "w")
         ff.write(diffcolor)
         ff.close()
@@ -288,8 +304,8 @@ def main():
         goodfile.append("<br>")
 
         md = md5sum + "_nocolor.html"
-        filefile="/var/www/sente/htdocs/uploaded/" + md
-        urlfile="/uploaded/" + md
+        filefile=root + md
+        urlfile="/uploaded/" + timestamp + "/" + md
         ff=open(filefile, "w")
         ff.write(diffnocolor)
         ff.close()
@@ -303,8 +319,8 @@ def main():
 
 
         md = md5sum + "_suppress.html"
-        filefile="/var/www/sente/htdocs/uploaded/" + md
-        urlfile="/uploaded/" + md
+        filefile=root + md
+        urlfile="/uploaded/" + timestamp + "/" + md
         ff=open(filefile, "w")
         ff.write(diffsuppress)
         ff.close()
@@ -317,8 +333,8 @@ def main():
         goodfile.append("<br>\n")
 
         md = md5sum + "_normal.html"
-        filefile="/var/www/sente/htdocs/uploaded/" + md
-        urlfile="/uploaded/" + md
+        filefile=root + md
+        urlfile="/uploaded/" + timestamp + "/" + md
         ff=open(filefile, "w")
         ff.write(diffnorm)
         ff.close()
